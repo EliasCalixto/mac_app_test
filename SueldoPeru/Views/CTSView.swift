@@ -22,10 +22,12 @@ struct CTSView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Datos") {
+                Section {
                     CampoMonto(titulo: "Sueldo bruto mensual", valor: $sueldo)
                     Toggle("Asignación familiar", isOn: $recibeAsignacion)
                     CampoMonto(titulo: "Última gratificación", valor: $gratificacion)
+                } header: {
+                    Text("Datos")
                 } footer: {
                     Text("Si trabajaste el semestre completo, tu última gratificación suele ser igual a un sueldo (sin contar la bonificación extraordinaria).")
                 }
@@ -44,12 +46,14 @@ struct CTSView: View {
                         TarjetaTotal(titulo: "Depósito de CTS", monto: resultado.total)
                     }
 
-                    Section("Detalle") {
+                    Section {
                         FilaResultado(titulo: "Remuneración computable", monto: resultado.remuneracionComputable)
                         FilaResultado(titulo: "Por meses (1/12 c/u)", monto: resultado.porMeses)
                         if resultado.porDias > 0 {
                             FilaResultado(titulo: "Por días (1/360 c/u)", monto: resultado.porDias)
                         }
+                    } header: {
+                        Text("Detalle")
                     } footer: {
                         Text("La CTS se deposita en mayo (semestre nov–abr) y noviembre (semestre may–oct). Remuneración computable = sueldo + asignación familiar + 1/6 de la última gratificación.")
                     }

@@ -40,12 +40,14 @@ struct GratificacionView: View {
                         TarjetaTotal(titulo: "Total a recibir", monto: resultado.total)
                     }
 
-                    Section("Detalle") {
+                    Section {
                         FilaResultado(titulo: "Gratificación", monto: resultado.gratificacion)
                         FilaResultado(
                             titulo: salud == .essalud ? "Bonificación extraordinaria (9%)" : "Bonificación extraordinaria (6.75%)",
                             monto: resultado.bonificacionExtraordinaria
                         )
+                    } header: {
+                        Text("Detalle")
                     } footer: {
                         Text("La gratificación se paga en julio y diciembre, no tiene descuento de AFP/ONP y se calcula por meses calendario completos trabajados en el semestre. Puede estar sujeta a retención de renta de 5ta categoría.")
                     }

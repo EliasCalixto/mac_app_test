@@ -35,7 +35,7 @@ struct SueldoNetoView: View {
                         TarjetaTotal(titulo: "Sueldo neto mensual", monto: resultado.sueldoNeto)
                     }
 
-                    Section("Descuentos") {
+                    Section {
                         if regimen == .onp {
                             FilaResultado(titulo: "ONP (13%)", monto: resultado.descuentoPension, negativo: true)
                         } else {
@@ -44,6 +44,8 @@ struct SueldoNetoView: View {
                             FilaResultado(titulo: "Prima de seguro", monto: resultado.primaSeguro, negativo: true)
                         }
                         FilaResultado(titulo: "Renta 5ta categoría", monto: resultado.rentaQuintaMensual, negativo: true)
+                    } header: {
+                        Text("Descuentos")
                     } footer: {
                         Text("Renta anual proyectada: \(resultado.rentaQuintaAnual.enSoles) (retención repartida en 12 meses). Cálculo referencial: la retención real de SUNAT varía según el mes y otros ingresos.")
                     }
