@@ -8,6 +8,11 @@ struct ContentView: View {
                     Label("Sueldo Neto", systemImage: "banknote")
                 }
 
+            ComparadorView()
+                .tabItem {
+                    Label("Comparar", systemImage: "arrow.left.arrow.right")
+                }
+
             GratificacionView()
                 .tabItem {
                     Label("Gratificación", systemImage: "gift")
@@ -18,9 +23,9 @@ struct ContentView: View {
                     Label("CTS", systemImage: "building.columns")
                 }
 
-            AjustesView()
+            MasView()
                 .tabItem {
-                    Label("Ajustes", systemImage: "gearshape")
+                    Label("Más", systemImage: "ellipsis.circle")
                 }
         }
     }

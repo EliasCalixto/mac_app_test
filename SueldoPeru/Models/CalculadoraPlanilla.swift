@@ -71,6 +71,16 @@ struct ResultadoSueldoNeto {
     let rentaQuintaMensual: Double
     let rentaQuintaAnual: Double
     let sueldoNeto: Double
+    /// 12 sueldos netos + 2 gratificaciones con bonificación (asumiendo EsSalud).
+    let ingresoAnualNeto: Double
+    /// CTS acumulada en un año (2 depósitos semestrales completos).
+    let ctsAnual: Double
+}
+
+struct ResultadoCuartaCategoria {
+    let retencion: Double
+    let neto: Double
+    let sujetoARetencion: Bool
 }
 
 struct ResultadoGratificacion {
@@ -111,6 +121,15 @@ enum CalculadoraPlanilla {
         let baseImponible = max(0, ingresoAnual - 7 * uit)
         let rentaAnual = impuestoAnual(baseImponible: baseImponible, uit: uit)
         let rentaMensual = rentaAnual / 12
+        let neto = bruta - pension - rentaMensual
+
+        // 12 sueldos netos + 2 gratificaciones (sin descuento de pensión) con
+        // bonificación extraordinaria del 9% (EsSalud). La renta anual ya está
+        // repartida en los 12 sueldos.
+        let gratisAnuales = bruta * 2 * (1 + RegimenSalud.essalud.bonificacionExtraordinaria)
+        let anualNeto = neto * 12 + gratisAnuales
+        // CTS de un año: 2 depósitos de medio sueldo computable (sueldo + 1/6 de grati).
+        let ctsAnual = bruta * 7 / 6
 
         return ResultadoSueldoNeto(
             remuneracionBruta: bruta,
@@ -120,8 +139,32 @@ enum CalculadoraPlanilla {
             primaSeguro: prima,
             rentaQuintaMensual: rentaMensual,
             rentaQuintaAnual: rentaAnual,
-            sueldoNeto: bruta - pension - rentaMensual
+            sueldoNeto: neto,
+            ingresoAnualNeto: anualNeto,
+            ctsAnual: ctsAnual
         )
+    }
+
+    /// Retención de renta de 4ta categoría (recibos por honorarios): 8% sobre
+    /// el monto del recibo cuando supera el límite y el pagador es agente de
+    /// retención.
+    static let limiteRetencionRecibo = 1500.0
+
+    static func cuartaCategoria(montoRecibo: Double) -> ResultadoCuartaCategoria {
+        let sujeto = montoRecibo > limiteRetencionRecibo
+        let retencion = sujeto ? montoRecibo * 0.08 : 0
+        return ResultadoCuartaCategoria(
+            retencion: retencion,
+            neto: montoRecibo - retencion,
+            sujetoARetencion: sujeto
+        )
+    }
+
+    /// Ingreso mensual promedio por debajo del cual se puede solicitar a SUNAT
+    /// la suspensión de retenciones de 4ta categoría. Aproximación derivada de
+    /// la deducción del 20% y las 7 UIT: (7 UIT ÷ 0.8) ÷ 12.
+    static func limiteSuspensionMensual(uit: Double) -> Double {
+        (7 * uit / 0.8) / 12
     }
 
     /// Impuesto a la renta de 5ta categoría por tramos progresivos
@@ -187,6 +230,43 @@ enum CalculadoraPlanilla {
             porDias: porDias,
             total: porMeses + porDias
         )
+    }
+}
+
+// MARK: - Fechas de planilla
+
+/// Fechas límite legales de pago: gratificaciones el 15 de julio y 15 de
+/// diciembre; depósitos de CTS el 15 de mayo y 15 de noviembre.
+enum FechasPlanilla {
+    static func proximaGratificacion(desde: Date = .now) -> Date {
+        proxima(dia: 15, meses: [7, 12], desde: desde)
+    }
+
+    static func proximaCTS(desde: Date = .now) -> Date {
+        proxima(dia: 15, meses: [5, 11], desde: desde)
+    }
+
+    static func diasHasta(_ fecha: Date, desde: Date = .now) -> Int {
+        let cal = Calendar.current
+        return cal.dateComponents(
+            [.day],
+            from: cal.startOfDay(for: desde),
+            to: cal.startOfDay(for: fecha)
+        ).day ?? 0
+    }
+
+    private static func proxima(dia: Int, meses: [Int], desde: Date) -> Date {
+        let cal = Calendar.current
+        let año = cal.component(.year, from: desde)
+        var candidatas: [Date] = []
+        for y in [año, año + 1] {
+            for m in meses {
+                if let fecha = cal.date(from: DateComponents(year: y, month: m, day: dia)) {
+                    candidatas.append(fecha)
+                }
+            }
+        }
+        return candidatas.filter { $0 > desde }.min() ?? desde
     }
 }
 

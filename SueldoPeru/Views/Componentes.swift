@@ -20,20 +20,62 @@ struct FilaResultado: View {
     }
 }
 
-/// Campo de monto en soles con teclado decimal.
+/// Campo de monto en soles con teclado decimal. Se muestra vacío cuando el
+/// valor es cero para que el usuario no tenga que borrar el "0" antes de
+/// escribir.
 struct CampoMonto: View {
     let titulo: String
     @Binding var valor: Double
+
+    private var valorOpcional: Binding<Double?> {
+        Binding(
+            get: { valor == 0 ? nil : valor },
+            set: { valor = $0 ?? 0 }
+        )
+    }
 
     var body: some View {
         HStack {
             Text(titulo)
             Spacer()
-            TextField("0.00", value: $valor, format: .number.precision(.fractionLength(0...2)))
+            Text("S/")
+                .foregroundStyle(.secondary)
+            TextField("0.00", value: valorOpcional, format: .number.precision(.fractionLength(0...2)))
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.trailing)
-                .frame(maxWidth: 140)
+                .frame(maxWidth: 110)
         }
+    }
+}
+
+/// Tarjeta con cuenta regresiva a una fecha de pago (gratificación o CTS).
+struct TarjetaCountdown: View {
+    let titulo: String
+    let fecha: Date
+
+    private var dias: Int { FechasPlanilla.diasHasta(fecha) }
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(titulo)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Text(fecha, format: .dateTime.day().month(.wide))
+                    .font(.headline)
+            }
+            Spacer()
+            VStack(spacing: 0) {
+                Text("\(dias)")
+                    .font(.system(.title, design: .rounded).bold())
+                    .foregroundStyle(Color.accentColor)
+                    .monospacedDigit()
+                Text(dias == 1 ? "día" : "días")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

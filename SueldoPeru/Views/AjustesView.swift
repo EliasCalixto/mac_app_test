@@ -5,7 +5,6 @@ struct AjustesView: View {
     @AppStorage("asignacionFamiliar") private var montoAsignacion = 113.0
 
     var body: some View {
-        NavigationStack {
             Form {
                 Section {
                     CampoMonto(titulo: "UIT vigente", valor: $uit)
@@ -41,7 +40,7 @@ struct AjustesView: View {
 
                 Section("Acerca de") {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Sueldo Perú v1.0")
+                        Text("Sueldo Perú v1.1")
                             .font(.headline)
                         Text("Todos los cálculos son referenciales y no reemplazan la información de tu boleta de pago ni la asesoría de un contador. Los montos reales pueden variar según tu empleador, tus ingresos variables y la normativa vigente.")
                             .font(.footnote)
@@ -51,7 +50,7 @@ struct AjustesView: View {
                 }
             }
             .navigationTitle("Ajustes")
-        }
+            .navigationBarTitleDisplayMode(.inline)
     }
 }
 

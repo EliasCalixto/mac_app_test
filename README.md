@@ -2,11 +2,17 @@
 
 App iOS (SwiftUI) para calcular en segundos los tres montos que todo trabajador en planilla del Perú quiere saber:
 
-- **Sueldo neto mensual** — descuenta AFP (Habitat, Integra, Prima, Profuturo) u ONP, y la retención de renta de 5ta categoría.
-- **Gratificación** (julio y diciembre) — proporcional a los meses trabajados, con bonificación extraordinaria del 9% (EsSalud) o 6.75% (EPS).
-- **CTS** (mayo y noviembre) — remuneración computable (sueldo + asignación + 1/6 de gratificación), por meses y días trabajados.
+- **Sueldo neto mensual** — descuenta AFP (Habitat, Integra, Prima, Profuturo) u ONP, y la retención de renta de 5ta categoría. Incluye proyección anual (12 sueldos + 2 gratis) y ahorro CTS del año.
+- **Gratificación** (julio y diciembre) — proporcional a los meses trabajados, con bonificación extraordinaria del 9% (EsSalud) o 6.75% (EPS), y cuenta regresiva a la próxima fecha de pago.
+- **CTS** (mayo y noviembre) — remuneración computable (sueldo + asignación + 1/6 de gratificación), por meses y días trabajados, con cuenta regresiva al próximo depósito.
 
-Incluye una pantalla de **Ajustes** para actualizar la UIT y la asignación familiar cuando cambien, sin necesidad de actualizar la app.
+Además (v1.1):
+
+- **Comparador de ofertas** — neto actual vs. neto de una oferta, con diferencia mensual y anual.
+- **Recibos por honorarios (4ta categoría)** — retención del 8% y límite de suspensión de retenciones.
+- **Compartir cálculo** desde Sueldo Neto y Gratificación.
+- El sueldo se escribe una vez y se comparte entre todas las calculadoras (persistido con `@AppStorage`).
+- Pantalla de **Ajustes** para actualizar la UIT y la asignación familiar cuando cambien, sin necesidad de actualizar la app.
 
 ## Requisitos
 
@@ -29,10 +35,13 @@ SueldoPeru/
 ├── Models/
 │   └── CalculadoraPlanilla.swift # Toda la lógica de cálculo (pura, sin UI)
 └── Views/
-    ├── ContentView.swift        # TabView principal
+    ├── ContentView.swift        # TabView principal (5 pestañas)
     ├── SueldoNetoView.swift
+    ├── ComparadorView.swift     # Sueldo actual vs. oferta
     ├── GratificacionView.swift
     ├── CTSView.swift
+    ├── CuartaCategoriaView.swift # Recibos por honorarios
+    ├── MasView.swift            # Pestaña "Más": honorarios + ajustes
     ├── AjustesView.swift
     └── Componentes.swift        # Filas, campos y tarjetas reutilizables
 ```
@@ -52,9 +61,10 @@ SueldoPeru/
 
 > ⚠️ Todos los cálculos son referenciales y no reemplazan la boleta de pago ni asesoría contable.
 
-## Roadmap (ideas para v1.x)
+## Roadmap (ideas para v1.2+)
 
 - Retención de 5ta con el método exacto de SUNAT por mes.
-- Comparador AFP vs ONP.
-- Widget con cuenta regresiva a la próxima grati/CTS.
-- Monetización: gratis con ads discretos o compra única para quitar límites.
+- Widget de pantalla de inicio con cuenta regresiva a la próxima grati/CTS.
+- Notificación local unos días antes de cada fecha de pago.
+- Modo "de neto a bruto" (¿cuánto bruto necesito para llevarme X?).
+- Monetización: gratis con compra única "Pro" (comparador ilimitado, widget, exportar PDF).

@@ -2,9 +2,9 @@ import SwiftUI
 
 struct CTSView: View {
     @AppStorage("asignacionFamiliar") private var montoAsignacion = 113.0
+    @AppStorage("sueldoBase") private var sueldo = 0.0
+    @AppStorage("recibeAsignacion") private var recibeAsignacion = false
 
-    @State private var sueldo = 0.0
-    @State private var recibeAsignacion = false
     @State private var gratificacion = 0.0
     @State private var mesesCompletos = 6
     @State private var diasAdicionales = 0
@@ -22,6 +22,13 @@ struct CTSView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    TarjetaCountdown(
+                        titulo: "Próximo depósito de CTS",
+                        fecha: FechasPlanilla.proximaCTS()
+                    )
+                }
+
                 Section {
                     CampoMonto(titulo: "Sueldo bruto mensual", valor: $sueldo)
                     Toggle("Asignación familiar", isOn: $recibeAsignacion)
@@ -59,6 +66,7 @@ struct CTSView: View {
                     }
                 }
             }
+            .scrollDismissesKeyboard(.immediately)
             .navigationTitle("CTS")
         }
     }

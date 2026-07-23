@@ -3,10 +3,9 @@ import SwiftUI
 struct SueldoNetoView: View {
     @AppStorage("uit") private var uit = 5350.0
     @AppStorage("asignacionFamiliar") private var montoAsignacion = 113.0
-
-    @State private var sueldo = 0.0
-    @State private var recibeAsignacion = false
-    @State private var regimen: RegimenPension = .integra
+    @AppStorage("sueldoBase") private var sueldo = 0.0
+    @AppStorage("recibeAsignacion") private var recibeAsignacion = false
+    @AppStorage("regimenPension") private var regimen: RegimenPension = .integra
 
     private var resultado: ResultadoSueldoNeto {
         CalculadoraPlanilla.sueldoNeto(
@@ -17,10 +16,21 @@ struct SueldoNetoView: View {
         )
     }
 
+    private var resumenCompartir: String {
+        """
+        💰 Mi cálculo con Sueldo Perú
+        Sueldo bruto: \(resultado.remuneracionBruta.enSoles)
+        Descuento de pensión (\(regimen.rawValue)): −\(resultado.descuentoPension.enSoles)
+        Renta 5ta categoría: −\(resultado.rentaQuintaMensual.enSoles)
+        Sueldo neto: \(resultado.sueldoNeto.enSoles)
+        Ingreso anual estimado: \(resultado.ingresoAnualNeto.enSoles)
+        """
+    }
+
     var body: some View {
         NavigationStack {
             Form {
-                Section("Datos") {
+                Section {
                     CampoMonto(titulo: "Sueldo bruto mensual", valor: $sueldo)
                     Toggle("Asignación familiar", isOn: $recibeAsignacion)
                     Picker("Régimen de pensión", selection: $regimen) {
@@ -28,6 +38,10 @@ struct SueldoNetoView: View {
                             Text(r.rawValue).tag(r)
                         }
                     }
+                } header: {
+                    Text("Datos")
+                } footer: {
+                    Text("Tu sueldo se guarda y se comparte con las demás calculadoras.")
                 }
 
                 if sueldo > 0 {
@@ -51,11 +65,22 @@ struct SueldoNetoView: View {
                     }
 
                     Section {
-                        FilaResultado(titulo: "Remuneración bruta", monto: resultado.remuneracionBruta)
-                        FilaResultado(titulo: "Total descuentos", monto: resultado.descuentoPension + resultado.rentaQuintaMensual, negativo: true)
+                        FilaResultado(titulo: "Ingreso neto anual", monto: resultado.ingresoAnualNeto, destacado: true)
+                        FilaResultado(titulo: "Ahorro CTS del año", monto: resultado.ctsAnual)
+                    } header: {
+                        Text("Tu año completo")
+                    } footer: {
+                        Text("Incluye 12 sueldos netos y 2 gratificaciones con bonificación del 9% (EsSalud). La CTS no es de libre disposición: se deposita en tu cuenta CTS en mayo y noviembre.")
+                    }
+
+                    Section {
+                        ShareLink(item: resumenCompartir) {
+                            Label("Compartir cálculo", systemImage: "square.and.arrow.up")
+                        }
                     }
                 }
             }
+            .scrollDismissesKeyboard(.immediately)
             .navigationTitle("Sueldo Neto")
         }
     }
