@@ -79,7 +79,8 @@ struct ComparadorView: View {
                     Section {
                         TarjetaTotal(
                             titulo: diferenciaMensual >= 0 ? "Ganas más con la oferta" : "Pierdes con la oferta",
-                            monto: diferenciaMensual
+                            monto: diferenciaMensual,
+                            estilo: diferenciaMensual >= 0 ? .positivo : .negativo
                         )
                     } footer: {
                         Text(veredicto)
@@ -99,7 +100,7 @@ struct ComparadorView: View {
                 }
             }
             .scrollDismissesKeyboard(.immediately)
-            .navigationTitle("Comparar")
+            .barraCalqui("Comparar")
         }
     }
 }

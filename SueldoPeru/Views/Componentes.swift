@@ -7,6 +7,12 @@ struct FilaResultado: View {
     var destacado = false
     var negativo = false
 
+    private var color: Color {
+        if negativo || monto < 0 { return .red }
+        if destacado { return Color.accentColor }
+        return .primary
+    }
+
     var body: some View {
         HStack {
             Text(titulo)
@@ -14,7 +20,7 @@ struct FilaResultado: View {
             Spacer()
             Text(negativo ? "− \(monto.enSoles)" : monto.enSoles)
                 .font(destacado ? .title3.bold() : .subheadline.monospacedDigit())
-                .foregroundStyle(destacado ? Color.accentColor : (negativo ? .red : .primary))
+                .foregroundStyle(color)
         }
         .accessibilityElement(children: .combine)
     }
@@ -155,23 +161,94 @@ struct EncabezadoMarca: View {
     }
 }
 
-/// Tarjeta grande con el resultado principal.
+// MARK: - Identidad de marca
+
+/// Paleta y estilos de marca de Calqui, reutilizados en toda la app.
+enum Marca {
+    static let verdeClaro = Color(red: 0.09, green: 0.73, blue: 0.50)
+    static let verdeOscuro = Color(red: 0.02, green: 0.42, blue: 0.31)
+    static let ambar = Color(red: 0.95, green: 0.66, blue: 0.20)
+}
+
+/// Estilo visual de la tarjeta de resultado principal.
+enum EstiloHero {
+    case marca, positivo, negativo, neutro
+
+    var degradado: LinearGradient {
+        let colores: [Color]
+        switch self {
+        case .marca, .positivo:
+            colores = [Marca.verdeClaro, Marca.verdeOscuro]
+        case .negativo:
+            colores = [Color(red: 0.92, green: 0.40, blue: 0.36), Color(red: 0.74, green: 0.21, blue: 0.22)]
+        case .neutro:
+            colores = [Color(red: 0.44, green: 0.49, blue: 0.53), Color(red: 0.27, green: 0.31, blue: 0.35)]
+        }
+        return LinearGradient(colors: colores, startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    var sombra: Color {
+        switch self {
+        case .marca, .positivo: return Marca.verdeOscuro.opacity(0.35)
+        case .negativo: return Color(red: 0.74, green: 0.21, blue: 0.22).opacity(0.32)
+        case .neutro: return Color.black.opacity(0.2)
+        }
+    }
+}
+
+/// Tarjeta hero con el resultado principal: fondo con degradado de marca y
+/// tipografía blanca (estilo de apps fintech). Aplica su propio estilo de fila
+/// para verse como tarjeta flotante dentro de un `Form`.
 struct TarjetaTotal: View {
     let titulo: String
     let monto: Double
+    var subtitulo: String? = nil
+    var estilo: EstiloHero = .marca
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 6) {
             Text(titulo)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.white.opacity(0.85))
             Text(monto.enSoles)
-                .font(.system(size: 36, weight: .bold, design: .rounded))
-                .foregroundStyle(Color.accentColor)
+                .font(.system(size: 40, weight: .bold, design: .rounded))
+                .foregroundStyle(.white)
                 .contentTransition(.numericText())
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+            if let subtitulo {
+                Text(subtitulo)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+            }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, 26)
+        .padding(.horizontal, 18)
+        .background(estilo.degradado)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: estilo.sombra, radius: 14, x: 0, y: 8)
+        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+        .listRowBackground(Color.clear)
         .accessibilityElement(children: .combine)
+    }
+}
+
+extension View {
+    /// Barra de navegación consistente en toda la app: logo de Calqui + título
+    /// centrados, como el encabezado de una app de producto (estilo fintech).
+    func barraCalqui(_ titulo: String) -> some View {
+        navigationTitle(titulo)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 8) {
+                        LogoCalqui(tamano: 26)
+                        Text(titulo)
+                            .font(.headline)
+                    }
+                }
+            }
     }
 }

@@ -81,7 +81,7 @@ struct SueldoNetoView: View {
                 }
             }
             .scrollDismissesKeyboard(.immediately)
-            .navigationTitle("Sueldo Neto")
+            .barraCalqui("Sueldo Neto")
         }
     }
 }

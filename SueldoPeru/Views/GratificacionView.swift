@@ -80,7 +80,7 @@ struct GratificacionView: View {
                 }
             }
             .scrollDismissesKeyboard(.immediately)
-            .navigationTitle("Gratificación")
+            .barraCalqui("Gratificación")
         }
     }
 }

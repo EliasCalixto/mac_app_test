@@ -67,7 +67,7 @@ struct CTSView: View {
                 }
             }
             .scrollDismissesKeyboard(.immediately)
-            .navigationTitle("CTS")
+            .barraCalqui("CTS")
         }
     }
 }
