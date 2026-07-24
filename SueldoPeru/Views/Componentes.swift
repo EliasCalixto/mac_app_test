@@ -20,19 +20,29 @@ struct FilaResultado: View {
     }
 }
 
-/// Campo de monto en soles con teclado decimal. Se muestra vacío cuando el
-/// valor es cero para que el usuario no tenga que borrar el "0" antes de
-/// escribir.
+/// Campo de monto en soles con teclado decimal.
+///
+/// Está respaldado por un `String` y confirma el valor en **cada tecla** (no al
+/// cerrar el teclado), de modo que el monto queda guardado aunque el usuario
+/// cierre la app de inmediato, y los resultados se actualizan en vivo mientras
+/// escribe. Se muestra vacío cuando el valor es cero.
+///
+/// Supone separador decimal "." y de miles "," (configuración de Perú).
 struct CampoMonto: View {
     let titulo: String
     @Binding var valor: Double
 
-    private var valorOpcional: Binding<Double?> {
-        Binding(
-            get: { valor == 0 ? nil : valor },
-            set: { valor = $0 ?? 0 }
-        )
-    }
+    @State private var texto = ""
+    @FocusState private var enfocado: Bool
+
+    private static let agrupado: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .decimal
+        f.maximumFractionDigits = 2
+        f.groupingSeparator = ","
+        f.decimalSeparator = "."
+        return f
+    }()
 
     var body: some View {
         HStack {
@@ -40,11 +50,46 @@ struct CampoMonto: View {
             Spacer()
             Text("S/")
                 .foregroundStyle(.secondary)
-            TextField("0.00", value: valorOpcional, format: .number.precision(.fractionLength(0...2)))
+            TextField("0.00", text: $texto)
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.trailing)
-                .frame(maxWidth: 110)
+                .frame(maxWidth: 130)
+                .focused($enfocado)
+                .onChange(of: texto) { _, nuevo in confirmar(nuevo) }
+                .onChange(of: enfocado) { _, activo in
+                    activo ? mostrarCrudo() : mostrarConSeparadores()
+                }
         }
+        .onAppear { mostrarConSeparadores() }
+        .onChange(of: valor) { _, _ in
+            if !enfocado { mostrarConSeparadores() }
+        }
+    }
+
+    /// Parsea el texto y escribe el valor en cada cambio (persistencia inmediata).
+    private func confirmar(_ nuevo: String) {
+        let limpio = nuevo.replacingOccurrences(of: ",", with: "")
+                          .replacingOccurrences(of: " ", with: "")
+        if limpio.isEmpty {
+            if valor != 0 { valor = 0 }
+        } else if let d = Double(limpio), d != valor {
+            valor = d
+        }
+    }
+
+    /// Mientras se edita: número plano, sin separadores de miles.
+    private func mostrarCrudo() {
+        texto = valor == 0 ? "" : recortado(valor)
+    }
+
+    /// En reposo: con separadores de miles (p. ej. "4,200").
+    private func mostrarConSeparadores() {
+        texto = valor == 0 ? "" : (Self.agrupado.string(from: NSNumber(value: valor)) ?? recortado(valor))
+    }
+
+    /// Sin ".0" cuando es un entero.
+    private func recortado(_ v: Double) -> String {
+        v == v.rounded() ? String(Int(v)) : String(v)
     }
 }
 
@@ -76,6 +121,37 @@ struct TarjetaCountdown: View {
             }
         }
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// Logo de la app (el mismo ícono, redondeado) para usar dentro de la interfaz.
+struct LogoCalqui: View {
+    var tamano: CGFloat = 44
+
+    var body: some View {
+        Image("LogoCalqui")
+            .resizable()
+            .scaledToFill()
+            .frame(width: tamano, height: tamano)
+            .clipShape(RoundedRectangle(cornerRadius: tamano * 0.22, style: .continuous))
+    }
+}
+
+/// Encabezado de marca: logo + nombre + descripción de la app.
+struct EncabezadoMarca: View {
+    var body: some View {
+        HStack(spacing: 14) {
+            LogoCalqui(tamano: 52)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Calqui")
+                    .font(.title3.bold())
+                Text("Calculadora de sueldos del Perú")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .padding(.vertical, 6)
     }
 }
 

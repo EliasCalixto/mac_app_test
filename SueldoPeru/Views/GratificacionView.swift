@@ -19,7 +19,7 @@ struct GratificacionView: View {
 
     private var resumenCompartir: String {
         """
-        🎁 Mi gratificación con Sueldo Perú
+        🎁 Mi gratificación con Calqui
         Gratificación: \(resultado.gratificacion.enSoles)
         Bonificación extraordinaria: \(resultado.bonificacionExtraordinaria.enSoles)
         Total a recibir: \(resultado.total.enSoles)
@@ -36,10 +36,10 @@ struct GratificacionView: View {
                     )
                 }
 
-                Section("Datos") {
+                Section {
                     CampoMonto(titulo: "Sueldo bruto mensual", valor: $sueldo)
                     Toggle("Asignación familiar", isOn: $recibeAsignacion)
-                    Picker("Meses trabajados en el semestre", selection: $mesesTrabajados) {
+                    Picker("Meses completos trabajados", selection: $mesesTrabajados) {
                         ForEach(1...6, id: \.self) { m in
                             Text("\(m) \(m == 1 ? "mes" : "meses")").tag(m)
                         }
@@ -49,6 +49,10 @@ struct GratificacionView: View {
                             Text(s.rawValue).tag(s)
                         }
                     }
+                } header: {
+                    Text("Datos")
+                } footer: {
+                    Text("Selecciona solo los meses calendario completos que trabajaste en el semestre. Los meses incompletos no se computan para la gratificación (los días sueltos se pagan aparte como \"gratificación trunca\").")
                 }
 
                 if sueldo > 0 {

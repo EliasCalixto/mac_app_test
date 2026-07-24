@@ -18,7 +18,7 @@ struct SueldoNetoView: View {
 
     private var resumenCompartir: String {
         """
-        💰 Mi cálculo con Sueldo Perú
+        💰 Mi cálculo con Calqui
         Sueldo bruto: \(resultado.remuneracionBruta.enSoles)
         Descuento de pensión (\(regimen.rawValue)): −\(resultado.descuentoPension.enSoles)
         Renta 5ta categoría: −\(resultado.rentaQuintaMensual.enSoles)

@@ -39,9 +39,17 @@ struct AjustesView: View {
                 }
 
                 Section("Acerca de") {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Sueldo Perú v1.1")
-                            .font(.headline)
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack(spacing: 12) {
+                            LogoCalqui(tamano: 44)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("Calqui")
+                                    .font(.headline)
+                                Text("Calculadora de sueldos · v1.2")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                         Text("Todos los cálculos son referenciales y no reemplazan la información de tu boleta de pago ni la asesoría de un contador. Los montos reales pueden variar según tu empleador, tus ingresos variables y la normativa vigente.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)

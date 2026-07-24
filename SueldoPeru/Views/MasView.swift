@@ -5,6 +5,11 @@ struct MasView: View {
         NavigationStack {
             List {
                 Section {
+                    EncabezadoMarca()
+                        .listRowBackground(Color.clear)
+                }
+
+                Section {
                     NavigationLink {
                         CuartaCategoriaView()
                     } label: {
